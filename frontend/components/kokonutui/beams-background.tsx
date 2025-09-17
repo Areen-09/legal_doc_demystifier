@@ -207,7 +207,7 @@ export default function BeamsBackground({
             }
             observer.disconnect();
         };
-    }, [intensity, opacityMap]);
+    }, [intensity]);
 
     return (
         <div

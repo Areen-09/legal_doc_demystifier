@@ -56,20 +56,22 @@ export default function Home() {
   };
 
   const handleGoogleLogin = async () => {
-    setError("");
-    setLoading(true);
-    try {
-      await firebaseAuthApi.signInWithGoogle();
-    } catch (e: any) {
-      if (e.code === "auth/popup-closed-by-user") {
-        setError("Sign-in was cancelled. Please try again.");
-      } else {
-        setError(e?.message || "Google sign-in failed. Please try again.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+    setError("");
+    setLoading(true);
+    try {
+      await firebaseAuthApi.signInWithGoogle();
+    } catch (e) { 
+      // Assert the type of 'e' to access its properties safely
+      const error = e as { code?: string; message?: string };
+      if (error.code === "auth/popup-closed-by-user") {
+        setError("Sign-in was cancelled. Please try again.");
+      } else {
+        setError(error?.message || "Google sign-in failed. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const renderContent = () => {
     if (pageState === "upload") {
