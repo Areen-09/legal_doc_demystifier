@@ -1,0 +1,7 @@
+google-cloud-aiplatform
+google-cloud-storage
+firebase-admin
+google-cloud-firestore
+python-docx
+pymupdf4llm
+functions-framework
