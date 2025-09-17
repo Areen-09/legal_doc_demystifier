@@ -47,7 +47,7 @@ export default function Home() {
       // 2. Redirect to the dashboard for the new document
       router.push(`/dashboard/${docId}`);
 
-    } catch (err: any) {
+    } catch (err) {
       console.error("Upload failed:", err);
       setError("Upload failed. Please try again.");
     } finally {

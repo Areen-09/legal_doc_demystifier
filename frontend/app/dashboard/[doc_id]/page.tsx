@@ -6,7 +6,7 @@ import BeamsBackground from "@/components/kokonutui/beams-background";
 import { doc, onSnapshot } from "firebase/firestore";
 import { auth, db } from "@/lib/firebase"; // Make sure auth is exported from firebase.ts
 import { 
-  BarChart3, Lightbulb, MessageCircle, ArrowLeft, FileText,
+  BarChart3, Lightbulb, MessageCircle, ArrowLeft,
   DollarSign, Calendar, Users, Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
