@@ -32,6 +32,12 @@ importers:
       mammoth:
         specifier: ^1.10.0
         version: 1.10.0
+      mark.js:
+        specifier: ^8.11.1
+        version: 8.11.1
+      mini-svg-data-uri:
+        specifier: ^1.4.4
+        version: 1.4.4
       motion:
         specifier: ^12.23.12
         version: 12.23.12(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -41,6 +47,9 @@ importers:
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      pdfjs-dist:
+        specifier: 5.3.93
+        version: 5.3.93
       react:
         specifier: 19.1.0
         version: 19.1.0
@@ -2250,6 +2259,9 @@ packages:
     engines: {node: '>=12.0.0'}
     hasBin: true
 
+  mark.js@8.11.1:
+    resolution: {integrity: sha512-1I+1qpDt4idfgLQG+BNWmrqku+7/2bi5nLf4YwF8y8zXvmfiTBY3PV3ZibfrjBueCByROpuBjLLFCajqkgYoLQ==}
+
   math-intrinsics@1.1.0:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
     engines: {node: '>= 0.4'}
@@ -2281,6 +2293,10 @@ packages:
   mime@3.0.0:
     resolution: {integrity: sha512-jSCU7/VB1loIWBZe14aEYHU/+1UMEHoaO7qxCOVJOw9GgH72VAWppxNcjU+x9a2k3GSIBXNKxXQFqRvvZ7vr3A==}
     engines: {node: '>=10.0.0'}
+    hasBin: true
+
+  mini-svg-data-uri@1.4.4:
+    resolution: {integrity: sha512-r9deDe9p5FJUPZAk3A59wGH7Ii9YrjjWw0jmw/liSbHl2CHiyXj6FcDXDu2K3TjVAXqiJdaw3xxwlZZr9E6nHg==}
     hasBin: true
 
   minimatch@3.1.2:
@@ -5359,6 +5375,8 @@ snapshots:
       underscore: 1.13.7
       xmlbuilder: 10.1.1
 
+  mark.js@8.11.1: {}
+
   math-intrinsics@1.1.0: {}
 
   merge-refs@2.0.0(@types/react@19.1.13):
@@ -5379,6 +5397,8 @@ snapshots:
       mime-db: 1.52.0
 
   mime@3.0.0: {}
+
+  mini-svg-data-uri@1.4.4: {}
 
   minimatch@3.1.2:
     dependencies:

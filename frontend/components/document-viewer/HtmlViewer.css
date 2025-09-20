@@ -1,0 +1,49 @@
+/* components/document-viewer/HtmlViewer.css */
+
+.html-content-container {
+  background-color: transparent;
+  color: #1f2937; /* text-gray-800 */
+  font-family: sans-serif;
+  line-height: 1.7;
+  height: 100%;
+}
+
+.html-content-container pre {
+  white-space: pre-wrap;
+  font-family: inherit;
+}
+
+.highlight-high, .highlight-medium, .highlight-low {
+  padding: 1px 2px;
+  border-radius: 3px;
+  color: #fff;
+  font-weight: 500;
+}
+
+.highlight-high {
+  background-color: rgba(239, 68, 68, 0.7); /* red-500 */
+}
+
+.highlight-medium {
+  background-color: rgba(245, 158, 11, 0.7); /* yellow-500 */
+}
+
+.highlight-low {
+  background-color: rgba(34, 197, 94, 0.7); /* green-500 */
+}
+
+.html-viewer-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+mark {
+  padding: 0 2px;
+  border-radius: 3px;
+}
+
+.active-highlight {
+  background: orange !important;
+  transition: background 0.3s ease;
+}

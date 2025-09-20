@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { Settings, CreditCard, FileText, LogOut, User, History } from "lucide-react";
+import { Settings, FileText, LogOut, User, History } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -12,7 +12,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-// removed unused Gemini icon import after replacing Model with History
 import { firebaseAuthApi } from "@/lib/firebase";
 
 interface Profile {
@@ -26,9 +25,10 @@ interface Profile {
 interface MenuItem {
     label: string;
     value?: string;
-    href: string;
+    href?: string;
     icon: React.ReactNode;
     external?: boolean;
+    onClick?: () => void;
 }
 
 const SAMPLE_PROFILE_DATA: Profile = {
@@ -62,6 +62,10 @@ export default function ProfileDropdown({
         return (first + second).toUpperCase() || base[0]?.toUpperCase() || "?";
     }, []);
 
+    const showComingSoon = React.useCallback(() => {
+        alert("Coming Soon");
+    }, []);
+
     React.useEffect(() => {
         const unsub = firebaseAuthApi.onChange((user) => {
             const authed = !!user;
@@ -69,7 +73,7 @@ export default function ProfileDropdown({
             if (authed && user) {
                 const name = user.displayName || user.email || "User";
                 const email = user.email || "";
-                const avatar = (user.photoURL as string) || "";
+                const avatar = user.photoURL || "";
                 setUserInfo({ name, email, avatar });
             } else {
                 setUserInfo(null);
@@ -81,37 +85,30 @@ export default function ProfileDropdown({
     if (!isAuthed) {
         return null;
     }
-    // legacy menuItems removed (Model). Using the History-based menu below.
 
     const displayData = userInfo || data;
 
     const menuItems: MenuItem[] = [
         {
             label: "Profile",
-            href: "#",
             icon: <User className="w-4 h-4" />,
+            onClick: showComingSoon,
         },
         {
             label: "History",
-            href: "#",
             icon: <History className="w-4 h-4" />,
-        },
-        {
-            label: "Subscription",
-            value: data.subscription,
-            href: "#",
-            icon: <CreditCard className="w-4 h-4" />,
+            onClick: showComingSoon,
         },
         {
             label: "Settings",
-            href: "#",
             icon: <Settings className="w-4 h-4" />,
+            onClick: showComingSoon,
         },
         {
             label: "Terms & Policies",
-            href: "#",
             icon: <FileText className="w-4 h-4" />,
             external: true,
+            onClick: showComingSoon,
         },
     ];
 
@@ -122,16 +119,8 @@ export default function ProfileDropdown({
                     <DropdownMenuTrigger asChild>
                         <button
                             type="button"
-                            className="flex items-center gap-16 p-3 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800/60 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 hover:shadow-sm transition-all duration-200 focus:outline-none"
+                            className="flex items-center justify-center size-12 p-1 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-200/60 dark:border-zinc-800/60 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-50/80 dark:hover:bg-zinc-800/40 hover:shadow-sm transition-all duration-200 focus:outline-none"
                         >
-                            <div className="text-left flex-1">
-                                <div className="text-sm font-medium text-zinc-900 dark:text-zinc-100 tracking-tight leading-tight">
-                                    {displayData.name}
-                                </div>
-                                <div className="text-xs text-zinc-500 dark:text-zinc-400 tracking-tight leading-tight">
-                                    {displayData.email}
-                                </div>
-                            </div>
                             <div className="relative">
                                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 p-0.5">
                                     <div className="w-full h-full rounded-full overflow-hidden bg-white dark:bg-zinc-900 flex items-center justify-center">
@@ -154,38 +143,6 @@ export default function ProfileDropdown({
                         </button>
                     </DropdownMenuTrigger>
 
-                    {/* Bending line indicator on the right */}
-                    <div
-                        className={cn(
-                            "absolute -right-3 top-1/2 -translate-y-1/2 transition-all duration-200",
-                            isOpen
-                                ? "opacity-100"
-                                : "opacity-60 group-hover:opacity-100"
-                        )}
-                    >
-                        <svg
-                            width="12"
-                            height="24"
-                            viewBox="0 0 12 24"
-                            fill="none"
-                            className={cn(
-                                "transition-all duration-200",
-                                isOpen
-                                    ? "text-blue-500 dark:text-blue-400 scale-110"
-                                    : "text-zinc-400 dark:text-zinc-500 group-hover:text-zinc-600 dark:group-hover:text-zinc-300"
-                            )}
-                            aria-hidden="true"
-                        >
-                            <path
-                                d="M2 4C6 8 6 16 2 20"
-                                stroke="currentColor"
-                                strokeWidth="1.5"
-                                strokeLinecap="round"
-                                fill="none"
-                            />
-                        </svg>
-                    </div>
-
                     <DropdownMenuContent
                         align="end"
                         sideOffset={4}
@@ -195,9 +152,10 @@ export default function ProfileDropdown({
                         <div className="space-y-1">
                             {menuItems.map((item) => (
                                 <DropdownMenuItem key={item.label} asChild>
-                                    <Link
-                                        href={item.href}
-                                        className="flex items-center p-3 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/60 rounded-xl transition-all duration-200 cursor-pointer group hover:shadow-sm border border-transparent hover:border-zinc-200/50 dark:hover:border-zinc-700/50"
+                                    <button
+                                        type="button"
+                                        onClick={item.onClick}
+                                        className="w-full flex items-center p-3 hover:bg-zinc-100/80 dark:hover:bg-zinc-800/60 rounded-xl transition-all duration-200 cursor-pointer group hover:shadow-sm border border-transparent hover:border-zinc-200/50 dark:hover:border-zinc-700/50"
                                     >
                                         <div className="flex items-center gap-2 flex-1">
                                             {item.icon}
@@ -219,7 +177,7 @@ export default function ProfileDropdown({
                                                 </span>
                                             )}
                                         </div>
-                                    </Link>
+                                    </button>
                                 </DropdownMenuItem>
                             ))}
                         </div>

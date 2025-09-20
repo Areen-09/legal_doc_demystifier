@@ -1,7 +1,17 @@
+# Web Framework
+fastapi
+uvicorn
+gunicorn
+
+# Google Cloud & AI
 google-cloud-aiplatform
-google-cloud-storage
+google-generativeai
 firebase-admin
-google-cloud-firestore
-python-docx
+google-cloud-storage
+google-auth
+
+# Document Processing
 pymupdf4llm
-functions-framework
+python-docx
+mammoth
+PyMuPDF

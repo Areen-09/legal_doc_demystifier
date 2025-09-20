@@ -6,12 +6,14 @@ import {
   onAuthStateChanged,
   GoogleAuthProvider,
   signInWithPopup,
+  signInAnonymously,
+  linkWithPopup,
   signOut,
   type Auth,
   type User
 } from "firebase/auth";
-import { getFirestore, collection, addDoc, serverTimestamp, getDocs, query, updateDoc, type Firestore } from "firebase/firestore";
-import { getStorage, ref, uploadBytes, type FirebaseStorage } from "firebase/storage";
+import { getFirestore, collection, addDoc, serverTimestamp, getDocs, query, updateDoc, doc, type Firestore } from "firebase/firestore";
+import { getStorage, ref, uploadBytes,uploadBytesResumable, type FirebaseStorage } from "firebase/storage";
 
 // --- Firebase Config from .env ---
 const firebaseConfig = {
@@ -51,58 +53,99 @@ if (configIsValid) {
  * @param {File} file - The file to be uploaded.
  * @returns {Promise<string>} The document ID of the created metadata record.
  */
-export async function uploadFileAndCreateMetadata(userId: string, file: File): Promise<string> {
-  if (!userId) {
-    throw new Error("User not authenticated. Cannot upload file.");
-  }
-  if (!file) {
-    throw new Error("No file provided for upload.");
-  }
+export async function uploadFileAndCreateMetadata(
+  userId: string, 
+  file: File, 
+  onProgress: (progress: number) => void
+): Promise<string> {
+  if (!userId) throw new Error("User not authenticated. Cannot upload file.");
+  if (!file) throw new Error("No file provided for upload.");
 
-  // 1. Create the initial metadata record in Firestore [cite: 219]
   const docCollectionRef = collection(db, "users", userId, "documents");
-  
   let docRef;
+
   try {
+    // Step 1: Create Firestore metadata
     docRef = await addDoc(docCollectionRef, {
-      userId: userId,
+      userId,
       fileName: file.name,
       fileSize: file.size,
       fileType: file.type,
       uploadTime: serverTimestamp(),
-      uploadStatus: 'PROCESSING', // Initial status as per the blueprint [cite: 219]
+      uploadStatus: 'PROCESSING',
       gcsPath: '',
+      statusMessage: '',
     });
   } catch (error) {
     console.error("Error creating Firestore metadata record:", error);
     throw new Error("Failed to create file metadata.");
   }
 
-  // 2. Upload the file to a structured path in GCS [cite: 207]
   const docId = docRef.id;
-  const gcsPath = `${userId}/${docId}/${file.name}`;// Path includes userId and docId [cite: 207]
+  const gcsPath = `${userId}/${docId}/${file.name}`;
   const storageRef = ref(storage, gcsPath);
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL!;
 
   try {
-    await uploadBytes(storageRef, file);
+    // Step 2: Upload file to GCS with progress
+    await new Promise<void>((resolve, reject) => {
+      const uploadTask = uploadBytesResumable(storageRef, file);
 
-    // 4. Update the Firestore document with the GCS path upon success
-    await updateDoc(docRef, {
-      gcsPath: gcsPath,
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          onProgress(Math.round(progress));
+        },
+        async (error) => {
+          await updateDoc(docRef, { uploadStatus: 'FAILED', statusMessage: error?.message || 'GCS upload failed' });
+          reject(error);
+        },
+        () => resolve()
+      );
     });
 
-    console.log(`Successfully uploaded ${file.name} and created metadata with ID: ${docId}`);
+    // Update Firestore with GCS path
+    await updateDoc(docRef, { gcsPath });
+
+    // Step 3: Call backend process_document
+    const params = new URLSearchParams({
+        bucket_name: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
+        file_path: gcsPath,
+        mime_type: file.type,
+    });
+
+    const res = await fetch(`${backendUrl}/process-document?${params.toString()}`, {
+      method: "POST",
+      // Body and Content-Type header are removed, as the data is now in the URL.
+    });
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Backend processing failed: ${text}`);
+    }
+
+    const result = await res.json();
+    console.log("Backend processing result:", result);
+
+    // Step 4: Mark upload as completed
+    await updateDoc(docRef, { uploadStatus: 'COMPLETED', statusMessage: '' });
+
     return docId;
 
-  } catch (error) {
-    // 5. If upload fails, update the status to 'FAILED' [cite: 237]
-    console.error("Error uploading file to GCS:", error);
-    await updateDoc(docRef, {
-      uploadStatus: 'FAILED',
-    });
-    throw new Error("File upload failed.");
+  } catch (err: unknown) {
+    // Ensure we safely capture all errors
+    const message = err instanceof Error ? err.message : JSON.stringify(err);
+    console.error("Error during upload/process:", message);
+
+    if (docRef) {
+      await updateDoc(docRef, { uploadStatus: 'FAILED', statusMessage: message });
+    }
+
+    throw new Error(message);
   }
 }
+
 
 
 // Get documents for a user
@@ -127,6 +170,11 @@ export const firebaseAuthApi = {
     if (!auth) return Promise.reject(new Error("Firebase not initialized"));
     return signOut(auth);
   },
+  // 👇 ADD THIS NEW METHOD FOR GUEST SIGN-IN
+  signInAsGuest: () => {
+    if (!auth) return Promise.reject(new Error("Firebase not initialized"));
+    return signInAnonymously(auth);
+  },
 
   signInWithGoogle: () => {
     if (!auth || !googleProvider) return Promise.reject(new Error("Firebase not initialized"));
@@ -136,6 +184,14 @@ export const firebaseAuthApi = {
   signUpWithGoogle: () => {
     if (!auth || !googleProvider) return Promise.reject(new Error("Firebase not initialized"));
     return signInWithPopup(auth, googleProvider);
+  },
+
+  linkWithGoogle: () => {
+    if (!auth || !googleProvider || !auth.currentUser) {
+      return Promise.reject(new Error("Firebase not initialized or no user is signed in."));
+    }
+    // This links the currently signed-in anonymous user with a Google account
+    return linkWithPopup(auth.currentUser, googleProvider);
   },
 };
 
