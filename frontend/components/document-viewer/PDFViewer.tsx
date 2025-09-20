@@ -38,10 +38,9 @@ const PDFViewer: React.FC<PDFViewerProps> = ({ pdfUrl, keyTerms }) => {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState<number>(1);
 
+  const file = useMemo(() => (pdfUrl ? { url: pdfUrl } : null), [pdfUrl]);
   if (!pdfUrl) return <p className="text-white">Loading PDF...</p>;
 
-  // ✅ Memoize file to avoid unnecessary reloads
-  const file = useMemo(() => ({ url: pdfUrl }), [pdfUrl]);
 
   return (
     <div className="pdf-container flex flex-col items-center gap-4">

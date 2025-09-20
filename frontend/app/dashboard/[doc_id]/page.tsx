@@ -96,7 +96,7 @@ export default function Dashboard() {
           }
           // --- END OF WORKAROUND ---
           
-          let finalData = { ...data };
+          const finalData = { ...data };
 
           // Get PDF URL if needed
           if (data.fileType === 'pdf' && !data.pdfUrl) {
@@ -185,8 +185,9 @@ export default function Dashboard() {
         const modelResponse: ChatMessage = { role: 'model', content: data.answer };
         setChatHistory(prev => [...prev, modelResponse]);
 
-    } catch (err: any) {
-        const errorMessage: ChatMessage = { role: 'model', content: `Sorry, an error occurred: ${err.message}` };
+    } catch (err: unknown) { // Use 'unknown' instead of 'any'
+        const message = err instanceof Error ? err.message : "An unknown error occurred.";
+        const errorMessage: ChatMessage = { role: 'model', content: `Sorry, an error occurred: ${message}` };
         setChatHistory(prev => [...prev, errorMessage]);
     } finally {
         setIsChatLoading(false);
