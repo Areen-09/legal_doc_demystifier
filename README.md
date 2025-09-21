@@ -1,4 +1,4 @@
-# Legal Doc Demystifier ⚖️✨
+# Legal Document Demystifier ⚖️✨
 
 Legal Doc Demystifier is an intelligent web application designed to make complex legal documents understandable for everyone. By leveraging the power of Google's Gemini Pro, this tool allows users to upload their legal texts (in PDF, DOCX, or TXT format) and receive a simplified explanation, a summary of key points, and an analysis of potential risks.
 
